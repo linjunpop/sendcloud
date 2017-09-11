@@ -3,6 +3,8 @@ defmodule Sendcloud.Client do
   @api_user ""
   @api_key ""
 
+  alias Sendcloud.Error
+
   def request(path, attrs, opts \\ []) when is_map(attrs) do
     url =
       @api_endpoint
@@ -27,9 +29,11 @@ defmodule Sendcloud.Client do
   defp normalize_response(response) do
     case response do
       {:ok, {{_httpvs, 200, _status_phrase}, json_body}} ->
-        {:ok, json_body |> parse_response_body()}
+        json_body
+        |> parse_response_body()
       {:ok, {{_httpvs, 200, _status_phrase}, _headers, json_body}} ->
-        {:ok, json_body |> parse_response_body()}
+        json_body
+        |> parse_response_body()
       {:ok, {{_httpvs, status, _status_phrase}, json_body}} ->
         {:error, status, json_body}
       {:ok, {{_httpvs, status, _status_phrase}, _headers, json_body}} ->
@@ -41,5 +45,19 @@ defmodule Sendcloud.Client do
   defp parse_response_body(json_body) do
     json_body
     |> Poison.decode!
+    |> handle_result
+  end
+
+  defp handle_result(%{"result" => true, "message" => 200, "info" => info}) do
+    {:ok, info}
+  end
+  defp handle_result(%{"result" => false, "statusCode" => code, "message" => message}) do
+    {
+      :error,
+      %Error{
+        code: code,
+        message: message
+      }
+    }
   end
 end

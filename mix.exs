@@ -21,6 +21,7 @@ defmodule Sendcloud.Mixfile do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:poison, "~> 3.0"},
       {:dialyxir, "~> 0.5", only: :dev},
       {:credo, "~> 0.7", only: [:dev, :test]},
 

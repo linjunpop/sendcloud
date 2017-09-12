@@ -28,17 +28,18 @@ defmodule Sendcloud.Client do
 
   defp normalize_response(response) do
     case response do
-      {:ok, {{_httpvs, 200, _status_phrase}, json_body}} ->
+      {:ok, {{_, 200, _}, json_body}} ->
         json_body
         |> parse_response_body()
-      {:ok, {{_httpvs, 200, _status_phrase}, _headers, json_body}} ->
+      {:ok, {{_, 200, _}, _, json_body}} ->
         json_body
         |> parse_response_body()
-      {:ok, {{_httpvs, status, _status_phrase}, json_body}} ->
-        {:error, status, json_body}
-      {:ok, {{_httpvs, status, _status_phrase}, _headers, json_body}} ->
-        {:error, status, json_body}
-      {:error, reason} -> {:error, :bad_fetch, reason}
+      {:ok, {{_, status, _}, json_body}} ->
+        handle_http_error(status, json_body)
+      {:ok, {{_, status, _}, _, json_body}} ->
+        handle_http_error(status, json_body)
+      {:error, reason} ->
+        {:error, code: :httpc, message: reason}
     end
   end
 
@@ -57,6 +58,16 @@ defmodule Sendcloud.Client do
       %Error{
         code: code,
         message: message
+      }
+    }
+  end
+
+  defp handle_http_error(status, body) do
+    {
+      :error,
+      %Error{
+        code: status,
+        message: body
       }
     }
   end

@@ -1,6 +1,8 @@
 defmodule Sendcloud.Stat do
   alias Sendcloud.Client
+  alias Sendcloud.Error
 
+  @spec list(:daily | :hourly | :invalid, map) :: {:ok, map} | {:error, Error.t}
   def list(:daily, attrs) do
     Client.request("statday/list", attrs)
   end

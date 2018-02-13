@@ -5,6 +5,7 @@ defmodule Sendcloud.Client do
 
   alias Sendcloud.Error
 
+  @spec request(binary, map, keyword) :: {:ok, map} | {:error, Error.t}
   def request(path, attrs, opts \\ []) when is_map(attrs) do
     url =
       @api_endpoint
